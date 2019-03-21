@@ -30,10 +30,7 @@ const mongooseOptions = {
 };
 
 mongoose
-  .connect(
-    process.env.MONGO_URI,
-    mongooseOptions
-  )
+  .connect(process.env.MONGO_URI, mongooseOptions)
   .then(() => console.log("DB connected"));
 
 mongoose.connection.on("error", err => {
@@ -66,7 +63,7 @@ app.prepare().then(() => {
 
   const MongoStore = mongoSessionStore(session);
   const sessionConfig = {
-    name: "next-connect.sid",
+    name: "social-network.sid",
     // secret used for using signed cookies w/ the session
     secret: process.env.SESSION_SECRET,
     store: new MongoStore({
