@@ -1,0 +1,8 @@
+{
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": false,
+  "prettier.semi": false,
+  "arrowParens": "avoid",
+  "prettier.trailingComma": "es5"
+}
