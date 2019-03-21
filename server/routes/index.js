@@ -15,6 +15,10 @@ const catchErrors = fn => {
 /**
  * AUTH ROUTES: /api/auth
  */
+
+// 註冊路由 api
+// 1.) 先執行 validateSignup, 驗證資料正確性
+// 2.) 若沒錯誤，將執行 signup 進行註冊
 router.post(
   "/api/auth/signup",
   authController.validateSignup,
