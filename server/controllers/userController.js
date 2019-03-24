@@ -85,9 +85,29 @@ exports.deleteUser = async (req, res) => {
   res.json(deletedUser);
 };
 
-exports.addFollowing = () => {};
+// 追蹤用戶
+// 追蹤用戶執行完後繼續接的執行 addFollower, 將自己資料更新再被追蹤者上
+exports.addFollowing = async (req, res, next) => {
+  const { followId } = req.body;
 
-exports.addFollower = () => {};
+  await User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $push: { following: followId } }
+  );
+  next();
+};
+
+// 新增追隨者
+exports.addFollower = async (req, res) => {
+  const { followId } = req.body;
+
+  const user = await User.findOneAndUpdate(
+    { _id: followId },
+    { $push: { followers: req.user._id } },
+    { new: true } // 回傳更新完後的值
+  );
+  res.json(user);
+};
 
 exports.deleteFollowing = () => {};
 

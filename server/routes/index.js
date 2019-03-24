@@ -33,6 +33,20 @@ router.get("/api/auth/signout", authController.signout);
 // 使用 :userId 的 api 路由, 都會進行 getUserById 方法處理
 router.param("userId", userController.getUserById);
 
+// 追蹤用戶 / 新增追隨者 (addFollowing 跟 addFollower 是連動的, 在 addFollowing 執行完後需接著執行 addFollower)
+router.put(
+  "/api/users/follow",
+  authController.checkAuth,
+  catchErrors(userController.addFollowing),
+  catchErrors(userController.addFollower)
+);
+router.put(
+  "/api/users/unfollow",
+  authController.checkAuth,
+  catchErrors(userController.deleteFollowing),
+  catchErrors(userController.deleteFollower)
+);
+
 router
   .route("/api/users/:userId")
   .get(userController.getAuthUser)
@@ -50,19 +64,6 @@ router.get(
   "/api/users/feed/:userId",
   authController.checkAuth,
   catchErrors(userController.getUserFeed)
-);
-
-router.put(
-  "/api/users/follow",
-  authController.checkAuth,
-  catchErrors(userController.addFollowing),
-  catchErrors(userController.addFollower)
-);
-router.put(
-  "/api/users/unfollow",
-  authController.checkAuth,
-  catchErrors(userController.deleteFollowing),
-  catchErrors(userController.deleteFollower)
 );
 
 /**

@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// 設定新增追蹤、追隨者時需儲存的資料
 const autoPopulateFollowingAndFollowers = function(next) {
   this.populate("following", "_id name avatar");
   this.populate("followers", "_id name avatar");
