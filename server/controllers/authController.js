@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const passport = require("passport");
 const User = mongoose.model("User");
 
 // 檢查註冊資料
@@ -49,12 +50,45 @@ exports.signup = async (req, res) => {
       // 註冊失敗, 回傳錯誤訊息 (500 內部服務器錯誤)
       return res.status(500).send(err.message);
     }
-    res.json(user);
+    res.json(user.name);
   });
 };
 
-exports.signin = () => {};
+// 登入
+// 使用 passport 驗證登入
+// passport 文件 http://www.passportjs.org/docs/
+exports.signin = (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return res.status(500).json(err.message);
+    }
+    if (!user) {
+      return res.status(400).json(info.message);
+    }
 
-exports.signout = () => {};
+    req.logIn(user, err => {
+      if (err) {
+        return res.status(500).json(err.message);
+      }
+      res.json(user);
+    });
+  })(req, res, next);
+};
 
-exports.checkAuth = () => {};
+// 登出
+exports.signout = (req, res) => {
+  // 清除 server session cookie, 名稱需跟 app.js 內的 sessionConfig.name 值一樣
+  // clearCookie 為 express 內建方法
+  res.clearCookie("social-network.sid");
+  req.logout();
+  res.json({ message: "你已經登出" });
+};
+
+// 驗證是否登入或已有 session
+// 使用 passport 內建方法 isAuthenticated()
+exports.checkAuth = (req, res, next) => {
+  if ((req, isAuthenticated())) {
+    return next();
+  }
+  res.redirect("/signin");
+};
