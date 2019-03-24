@@ -30,6 +30,7 @@ router.get("/api/auth/signout", authController.signout);
 /**
  * USER ROUTES: /api/users
  */
+// 使用 :userId 的 api 路由, 都會進行 getUserById 方法處理
 router.param("userId", userController.getUserById);
 
 router
@@ -44,10 +45,7 @@ router
   .delete(authController.checkAuth, catchErrors(userController.deleteUser));
 
 router.get("/api/users", userController.getUsers);
-router.get(
-  "/api/users/profile/:userId",
-  catchErrors(userController.getUserProfile)
-);
+router.get("/api/users/profile/:userId", userController.getUserProfile);
 router.get(
   "/api/users/feed/:userId",
   authController.checkAuth,
