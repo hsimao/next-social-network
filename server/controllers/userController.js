@@ -63,7 +63,18 @@ exports.getUserProfile = (req, res) => {
   res.json(req.profile);
 };
 
-exports.getUserFeed = () => {};
+// 顯示當中可以追蹤的用戶
+// 1. 將查詢用戶 id push 到 following 中以便查詢時排除自己(不可追蹤自己)
+// 2. 使用 mongo $nin 不包含 查詢功能, 僅顯示沒有在 following 內的用戶
+exports.getUserFeed = async (req, res) => {
+  const { following, _id } = req.profile;
+
+  following.push(_id);
+  const users = await User.find({ _id: { $nin: following } }).select(
+    "_id name avatar"
+  );
+  res.json(users);
+};
 
 exports.uploadAvatar = () => {};
 
@@ -73,8 +84,6 @@ exports.updateUser = () => {};
 
 // 刪除用戶, 刪除前需確認刪除的 id 是否為當下登入用戶
 exports.deleteUser = async (req, res) => {
-  console.log("deleteUser");
-
   const { userId } = req.params;
   if (!req.isAuthUser) {
     return res.status(400).json({
