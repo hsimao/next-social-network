@@ -109,6 +109,25 @@ exports.addFollower = async (req, res) => {
   res.json(user);
 };
 
-exports.deleteFollowing = () => {};
+// 取消追蹤
+exports.deleteFollowing = async (req, res, next) => {
+  const { followId } = req.body;
 
-exports.deleteFollower = () => {};
+  await User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $pull: { following: followId } }
+  );
+  next();
+};
+
+// 刪除追蹤者
+exports.deleteFollower = async (req, res) => {
+  const { followId } = req.body;
+
+  const user = await User.findOneAndUpdate(
+    { _id: followId },
+    { $pull: { followers: req.user._id } },
+    { new: true }
+  );
+  res.json(user);
+};
