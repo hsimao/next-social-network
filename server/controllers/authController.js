@@ -87,7 +87,7 @@ exports.signout = (req, res) => {
 // 驗證是否登入或已有 session
 // 使用 passport 內建方法 isAuthenticated()
 exports.checkAuth = (req, res, next) => {
-  if ((req, isAuthenticated())) {
+  if (req.isAuthenticated()) {
     return next();
   }
   res.redirect("/signin");
