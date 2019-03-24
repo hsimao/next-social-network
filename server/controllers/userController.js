@@ -51,7 +51,17 @@ exports.getAuthUser = (req, res, next) => {
   res.json(req.user);
 };
 
-exports.getUserProfile = () => {};
+// == 取得用戶個人詳細資料
+// route: get /api/users/profile/:userId
+// 1. 判斷 req.profile 內是否已經存有用戶資料, 有則回傳 (所有包含 :userId 相關路由皆會觸發 getUserById 驗證id並將資料儲存到 req.profile 內)
+exports.getUserProfile = (req, res) => {
+  if (!req.profile) {
+    return res.status(404).json({
+      message: "未找到用戶資訊"
+    });
+  }
+  res.json(req.profile);
+};
 
 exports.getUserFeed = () => {};
 
