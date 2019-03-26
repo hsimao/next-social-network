@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const User = mongoose.model("User");
+const multer = require("multer");
+const jimp = require("jimp");
 
 // 取得所有用戶資料
 exports.getUsers = async (req, res) => {
@@ -76,11 +78,52 @@ exports.getUserFeed = async (req, res) => {
   res.json(users);
 };
 
-exports.uploadAvatar = () => {};
+// multer 參數設定
+const avatarUploadOptions = {
+  storage: multer.memoryStorage(),
+  limits: {
+    // 檔案大小最大為 1mb
+    fileSize: 1024 * 1024 * 1
+  },
+  fileFilter: (req, file, next) => {
+    if (file.mimetype.startsWith("image/")) {
+      next(null, true);
+    } else {
+      next(null, false);
+    }
+  }
+};
 
-exports.resizeAvatar = () => {};
+// 接受一個以 avatar 命名的文件。這個文件的信息保存在 req.file
+exports.uploadAvatar = multer(avatarUploadOptions).single("avatar");
 
-exports.updateUser = () => {};
+// 大頭照尺寸更新為寬度 250
+// 更新完後儲存到 /static/uploads/avatars/
+exports.resizeAvatar = async (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+  const extension = req.file.mimetype.split("/")[1];
+  req.body.avatar = `/static/uploads/avatars/${req.user.name}-${
+    req.user._id
+  }.${extension}`;
+  const image = await jimp.read(req.file.buffer);
+  await image.resize(250, jimp.AUTO);
+  await image.write(`./${req.body.avatar}`);
+  next();
+};
+
+// 更新 user 資料
+exports.updateUser = async (req, res) => {
+  req.body.updatedAt = new Date().toISOString();
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $set: req.body },
+    // 回傳最新資料，並啟用驗證，驗證規則對應 models/User.js 內的 userSchema
+    { new: true, runValidators: true }
+  );
+  res.json(updatedUser);
+};
 
 // 刪除用戶, 刪除前需確認刪除的 id 是否為當下登入用戶
 exports.deleteUser = async (req, res) => {
