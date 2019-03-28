@@ -71,6 +71,24 @@ exports.getPostFeed = async (req, res) => {
   res.json(posts);
 };
 
-exports.toggleLike = () => {};
+// like 文章 ( 接收postId )
+// 1.) 抓出文章所有已 like 用戶 id
+// 2.) 將所有用戶 id, 當前用戶 id 轉成字串
+// 3.) 使用字串方法 ( includes ) 判斷是否已經存在 ( 已點過 like )
+// 4.) 已點過就 unlike, 尚未點過就 like
+exports.toggleLike = async (req, res) => {
+  const { postId } = req.body;
+
+  const post = await Post.findOne({ _id: postId });
+  const likeIds = post.likes.map(id => id.toString());
+  const authUserId = req.user._id.toString();
+  if (likeIds.includes(authUserId)) {
+    await post.likes.pull(authUserId);
+  } else {
+    await post.likes.push(authUserId);
+  }
+  await post.save();
+  res.json(post);
+};
 
 exports.toggleComment = () => {};
