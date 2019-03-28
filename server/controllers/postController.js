@@ -52,9 +52,24 @@ exports.deletePost = () => {};
 
 exports.getPostById = () => {};
 
-exports.getPostsByUser = () => {};
+// 取得指定用戶文章列表
+exports.getPostsByUser = async (req, res) => {
+  const posts = await Post.find({ postedBy: req.profile._id }).sort({
+    createdAt: -1 // 1(升序) -1(降序)
+  });
+  res.json(posts);
+};
 
-exports.getPostFeed = () => {};
+// 抓出指定用戶的所有追蹤者文章, 包含這位用戶文章
+exports.getPostFeed = async (req, res) => {
+  const { following, _id } = req.profile;
+
+  following.push(_id);
+  const posts = await Post.find({ postedBy: { $in: following } }).sort({
+    createdAt: -1
+  });
+  res.json(posts);
+};
 
 exports.toggleLike = () => {};
 
