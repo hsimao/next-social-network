@@ -91,4 +91,31 @@ exports.toggleLike = async (req, res) => {
   res.json(post);
 };
 
-exports.toggleComment = () => {};
+// 新增、刪除留言 ( 接收 comment, postId )
+// 1.) 使用 url 判斷 uncomment 或 comment, 來各別設定參數
+// 2.) 新增留言需要傳遞 { postId: 'id', comment: { text: 'hello' } }
+// 3.) 刪除留言需要傳遞 { postId: 'id', comment: { _id: 'id' } }
+// 4.) 使用 postSchema populate, 來自動產生對應的 postedBy 值
+exports.toggleComment = async (req, res) => {
+  const { comment, postId } = req.body;
+  let operator, data;
+
+  if (req.url.includes("uncomment")) {
+    operator = "$pull";
+    data = { _id: comment._id };
+  } else {
+    // 新增留言, 傳遞 text 之外還要傳遞創建者 id 讓資料庫自動填充留言者資料
+    operator = "$push";
+    data = { text: comment.text, postedBy: req.user._id };
+  }
+
+  // 使用 postId 找到文章，新增留言或刪除留言
+  const updatedPost = await Post.findOneAndUpdate(
+    { _id: postId },
+    { [operator]: { comments: data } },
+    { new: true }
+  )
+    .populate("postedBy", "_id name avatar")
+    .populate("comments.postedBy", "_id name avatar");
+  res.json(updatedPost);
+};
