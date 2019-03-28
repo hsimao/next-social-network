@@ -48,9 +48,51 @@ exports.addPost = async (req, res) => {
   res.json(post);
 };
 
-exports.deletePost = () => {};
+// 驗證文章 id ( 所有包含 :postId 的路由將執行此方法 )
+// 1. 驗證 id 格式
+// 2. 確認資料庫有該篇文章
+exports.validatePostId = async (req, res, next, id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "id格式有誤" });
+  }
 
-exports.getPostById = () => {};
+  await Post.findOne({ _id: id }, (err, res) => {
+    if (!err) {
+      req.post = res;
+      next();
+    } else {
+      return res
+        .state(404)
+        .json({ message: `未找到該篇文章, error: ${err.message}` });
+    }
+  });
+};
+
+// 判斷文章是否為作者
+// 1. 從 req.post 取得資料來驗證
+// 2. 將 文章 postedBy id 轉為 mongo ObjectId 格式
+// 3. 驗證是否有登入, 以及是否為創建者本人
+// 4. 是本人則將 req.isPoster 設定為 true
+exports.validatePoster = async (req, res, next) => {
+  const posterId = mongoose.Types.ObjectId(req.post.postedBy._id);
+  if (req.user && posterId.equals(req.user._id)) {
+    req.isPoster = true;
+    return next();
+  }
+  next();
+};
+
+// 刪除文章
+exports.deletePost = async (req, res) => {
+  const { _id } = req.post;
+  if (!req.isPoster) {
+    return res.status(400).json({
+      message: "非文章擁有者，無權限刪除"
+    });
+  }
+  const deletedPost = await Post.findOneAndDelete({ _id });
+  res.json(deletedPost);
+};
 
 // 取得指定用戶文章列表
 exports.getPostsByUser = async (req, res) => {
@@ -70,6 +112,9 @@ exports.getPostFeed = async (req, res) => {
   });
   res.json(posts);
 };
+
+// 驗證 post id
+exports.v;
 
 // like 文章 ( 接收postId )
 // 1.) 抓出文章所有已 like 用戶 id

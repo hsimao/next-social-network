@@ -69,7 +69,8 @@ router.get(
 /**
  * POST ROUTES: /api/posts
  */
-router.param("postId", postController.getPostById);
+// 使用 :postId 的 api 路由, 都會執行 getPostById 方法進行驗證
+router.param("postId", postController.validatePostId);
 
 router.put(
   "/api/posts/like",
@@ -96,6 +97,7 @@ router.put(
 router.delete(
   "/api/posts/:postId",
   authController.checkAuth,
+  catchErrors(postController.validatePoster),
   catchErrors(postController.deletePost)
 );
 
