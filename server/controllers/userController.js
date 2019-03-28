@@ -137,7 +137,7 @@ exports.deleteUser = async (req, res) => {
   res.json(deletedUser);
 };
 
-// 追蹤用戶
+// 追蹤用戶 (接收值 followId)
 // 追蹤用戶執行完後繼續接的執行 addFollower, 將自己資料更新再被追蹤者上
 exports.addFollowing = async (req, res, next) => {
   const { followId } = req.body;
@@ -149,7 +149,7 @@ exports.addFollowing = async (req, res, next) => {
   next();
 };
 
-// 新增追隨者
+// 新增追隨者 (接收值 followId)
 exports.addFollower = async (req, res) => {
   const { followId } = req.body;
 
@@ -161,7 +161,7 @@ exports.addFollower = async (req, res) => {
   res.json(user);
 };
 
-// 取消追蹤
+// 取消追蹤 (接收值 followId)
 exports.deleteFollowing = async (req, res, next) => {
   const { followId } = req.body;
 
@@ -172,7 +172,7 @@ exports.deleteFollowing = async (req, res, next) => {
   next();
 };
 
-// 刪除追蹤者
+// 刪除追蹤者 (接收值 followId)
 exports.deleteFollower = async (req, res) => {
   const { followId } = req.body;
 
