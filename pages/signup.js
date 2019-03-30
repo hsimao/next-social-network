@@ -12,18 +12,30 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Slide from "@material-ui/core/Slide";
-import Gavel from "@material-ui/icons/Gavel";
+import AssignmentSharp from "@material-ui/icons/AssignmentSharp";
 import VerifiedUserTwoTone from "@material-ui/icons/VerifiedUserTwoTone";
 import withStyles from "@material-ui/core/styles/withStyles";
+import Link from "next/link";
 
 import { signupUser } from "../lib/auth";
+
+function Transition(props) {
+  return <Slide direction="up" {...props} />;
+}
 
 class Signup extends React.Component {
   state = {
     name: "",
     email: "",
-    password: ""
+    password: "",
+    error: "",
+    createdUser: "",
+    openError: false,
+    openSuccess: false,
+    isLoading: false
   };
+
+  handleClose = () => this.setState({ openError: false });
 
   handleChange = event => {
     this.setState({ [event.target.name]: event.target.value });
@@ -31,6 +43,7 @@ class Signup extends React.Component {
 
   handleSubmit = event => {
     const { name, email, password } = this.state;
+    this.setState({ isLoading: true, error: "" });
     event.preventDefault();
 
     const user = {
@@ -39,20 +52,47 @@ class Signup extends React.Component {
       password
     };
 
-    signupUser(user);
+    signupUser(user)
+      .then(createdUser => {
+        this.setState({
+          createdUser,
+          error: "",
+          openSuccess: true,
+          isLoading: false
+        });
+      })
+      .catch(this.showError);
+  };
+
+  showError = err => {
+    const error = (err.response && err.response.data) || err.message;
+    console.log("error", error);
+    this.setState({ error: error, openError: true, isLoading: false });
   };
 
   render() {
     const { classes } = this.props;
+    const {
+      error,
+      openError,
+      openSuccess,
+      createdUser,
+      isLoading
+    } = this.state;
+
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <Gavel />
-          </Avatar>
-          <Typography variant="h5" component="h1">
-            註冊
-          </Typography>
+          <div className={classes.head}>
+            <AssignmentSharp className={classes.headIcon} />
+            <Typography
+              variant="h5"
+              component="h1"
+              className={classes.headText}
+            >
+              註冊
+            </Typography>
+          </div>
 
           <form onSubmit={this.handleSubmit} className={classes.form}>
             <FormControl margin="normal" required fullWidth>
@@ -77,11 +117,48 @@ class Signup extends React.Component {
               fullWidth
               variant="contained"
               color="primary"
+              disabled={isLoading}
             >
-              送出
+              {isLoading ? "處理中..." : "送出"}
             </Button>
           </form>
+
+          {/* 錯誤提示窗 */}
+          {error && (
+            <Snackbar
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right"
+              }}
+              open={openError}
+              onClose={this.handleClose}
+              autoHideDuration={6000}
+              message={<span className={classes.snack}>{error}</span>}
+            />
+          )}
         </Paper>
+
+        {/* 成功彈窗 */}
+        <Dialog
+          open={openSuccess}
+          disableBackdropClick={true}
+          TransitionComponent={Transition}
+        >
+          <DialogTitle>
+            <VerifiedUserTwoTone className={classes.icon} />
+            新帳號
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>用戶 {createdUser} 已註冊成功</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button color="primary" variant="contained">
+              <Link href="/signin">
+                <a className={classes.signinLink}>前往登入</a>
+              </Link>
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
@@ -98,6 +175,20 @@ const styles = theme => ({
       marginLeft: "auto",
       marginRight: "auto"
     }
+  },
+  head: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  headIcon: {
+    marginRight: theme.spacing.unit,
+    marginTop: "2px",
+    fontSize: "30px",
+    color: theme.palette.primary.main
+  },
+  headText: {
+    color: theme.palette.primary.main
   },
   paper: {
     marginTop: theme.spacing.unit * 8,
@@ -121,8 +212,11 @@ const styles = theme => ({
   submit: {
     marginTop: theme.spacing.unit * 2
   },
+  snackbar: {
+    border: "solid 1px blue"
+  },
   snack: {
-    color: theme.palette.secondary.light
+    color: theme.palette.accent.light
   },
   icon: {
     padding: "0px 2px 2px 0px",
