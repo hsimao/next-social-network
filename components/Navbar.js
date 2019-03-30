@@ -7,6 +7,8 @@ import withStyles from "@material-ui/core/styles/withStyles";
 
 import ActiveLink from "./ActiveLink";
 
+import { signoutUser } from "../lib/auth";
+
 const Navbar = ({ classes, router, pageProps: { auth } }) => {
   const { user = {} } = auth || {};
   return (
@@ -34,7 +36,7 @@ const Navbar = ({ classes, router, pageProps: { auth } }) => {
             <Button color="inherit">
               <ActiveLink href="/profile">個人資料</ActiveLink>
             </Button>
-            <Button color="inherit" variant="outlined">
+            <Button onClick={signoutUser} color="inherit" variant="outlined">
               登出
             </Button>
           </div>

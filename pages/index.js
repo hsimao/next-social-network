@@ -5,6 +5,8 @@
 // import Button from "@material-ui/core/Button";
 import withStyles from "@material-ui/core/styles/withStyles";
 
+import { authInitialProps } from "../lib/auth";
+
 class Index extends React.Component {
   state = {};
 
@@ -50,5 +52,12 @@ const styles = theme => ({
     margin: "0 auto"
   }
 });
+
+/*
+  使用 authInitialProps 進行驗證
+  authInitialProps 未傳遞參數, 表示此頁單純傳遞 auth 資料，不進行跳轉驗證保護
+  將 auth { auth, userId } 資料傳遞到該頁 props
+*/
+Index.getInitialProps = authInitialProps();
 
 export default withStyles(styles)(Index);

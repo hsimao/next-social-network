@@ -17,6 +17,8 @@
 // import EditSharp from "@material-ui/icons/EditSharp";
 import withStyles from "@material-ui/core/styles/withStyles";
 
+import { authInitialProps } from "../lib/auth";
+
 class EditProfile extends React.Component {
   state = {};
 
@@ -82,5 +84,12 @@ const styles = theme => ({
     display: "none"
   }
 });
+
+/*
+  使用 authInitialProps 進行驗證，傳遞參數 true 表示為保護路線
+  該頁須已登入過才能訪問，若無登入將轉跳到登入頁面
+  將 auth { auth, userId } 資料傳遞到該頁 props
+*/
+EditProfile.getInitialProps = authInitialProps(true);
 
 export default withStyles(styles)(EditProfile);

@@ -12,6 +12,8 @@
 // import Edit from "@material-ui/icons/Edit";
 import withStyles from "@material-ui/core/styles/withStyles";
 
+import { authInitialProps } from "../lib/auth";
+
 class Profile extends React.Component {
   state = {};
 
@@ -47,5 +49,12 @@ const styles = theme => ({
     margin: 10
   }
 });
+
+/*
+  使用 authInitialProps 進行驗證，傳遞參數 true 表示為保護路線
+  該頁須已登入過才能訪問，若無登入將轉跳到登入頁面
+  將 auth { auth, userId } 資料傳遞到該頁 props
+*/
+Profile.getInitialProps = authInitialProps(true);
 
 export default withStyles(styles)(Profile);
