@@ -86,7 +86,7 @@ class Signup extends React.Component {
           <div className={classes.head}>
             <AssignmentSharp className={classes.headIcon} />
             <Typography
-              variant="h5"
+              variant="h6"
               component="h1"
               className={classes.headText}
             >
@@ -211,9 +211,6 @@ const styles = theme => ({
   },
   submit: {
     marginTop: theme.spacing.unit * 2
-  },
-  snackbar: {
-    border: "solid 1px blue"
   },
   snack: {
     color: theme.palette.accent.light

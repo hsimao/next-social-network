@@ -63,7 +63,14 @@ exports.signin = (req, res, next) => {
       return res.status(500).json(err.message);
     }
     if (!user) {
-      return res.status(400).json(info.message);
+      let message = "";
+      if (info.name === "IncorrectPasswordError") {
+        message = "密碼錯誤";
+      }
+      if (info.name === "IncorrectUsernameError") {
+        message = "帳號錯誤";
+      }
+      return res.status(400).json(message);
     }
 
     req.logIn(user, err => {
