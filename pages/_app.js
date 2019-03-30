@@ -4,7 +4,8 @@ import Head from "next/head";
 import MuiThemeProvider from "@material-ui/core/styles/MuiThemeProvider";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import JssProvider from "react-jss/lib/JssProvider";
-
+import NProgress from "next-nprogress/component";
+import withNProgress from "next-nprogress";
 import Navbar from "../components/Navbar";
 import getPageContext from "../lib/getPageContext";
 
@@ -49,9 +50,18 @@ class MyApp extends App {
             <Component pageContext={this.pageContext} {...pageProps} />
           </MuiThemeProvider>
         </JssProvider>
+        <NProgress
+          color="#fff"
+          options={{ trickleSpeed: 50 }}
+          showAfterMs={300}
+          spinner
+        />
       </Container>
     );
   }
 }
 
-export default MyApp;
+// 頁面頂部 loading bar progress 配置
+const msDelay = 1000; // default is 300
+const configOptions = { trickleSpeed: 50 };
+export default withNProgress(msDelay, configOptions)(MyApp);

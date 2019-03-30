@@ -34,7 +34,7 @@ const Navbar = ({ classes, router, pageProps: { auth } }) => {
           // 已登入功能按鈕
           <div>
             <Button color="inherit">
-              <ActiveLink href="/profile">個人資料</ActiveLink>
+              <ActiveLink href={`/profile/${user._id}`}>個人資料</ActiveLink>
             </Button>
             <Button onClick={signoutUser} color="inherit" variant="outlined">
               登出

@@ -116,6 +116,7 @@ app.prepare().then(() => {
   });
 
   /* create custom routes with route params */
+  // 只要是 /profile/:userId 的路由都會重新刷新，跟後端發送請求
   server.get("/profile/:userId", (req, res) => {
     const routeParams = Object.assign({}, req.params, req.query);
     return app.render(req, res, "/profile", routeParams);
