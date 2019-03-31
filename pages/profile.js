@@ -14,6 +14,8 @@ import withStyles from "@material-ui/core/styles/withStyles";
 import Link from "next/link";
 
 import FollowUser from "../components/profile/FollowUser";
+import DeleteUser from "../components/profile/DeleteUser";
+
 import { authInitialProps } from "../lib/auth";
 import { getUser } from "../lib/api";
 
@@ -81,7 +83,7 @@ class Profile extends React.Component {
                 <Avatar src={user.avatar} className={classes.bigAvatar} />
               </ListItemAvatar>
               <ListItemText primary={user.name} secondary={user.email} />
-              {/* 本人 - 編輯按鈕 / 非本人 - 追蹤按鈕 */}
+              {/* 本人 - 編輯、刪除按鈕 / 非本人 - 追蹤按鈕 */}
               {isAuth ? (
                 <ListItemSecondaryAction>
                   <Link href="/edit-profile">
@@ -91,6 +93,7 @@ class Profile extends React.Component {
                       </IconButton>
                     </a>
                   </Link>
+                  <DeleteUser user={user} />
                 </ListItemSecondaryAction>
               ) : (
                 <FollowUser
