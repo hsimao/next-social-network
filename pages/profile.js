@@ -13,6 +13,7 @@ import Edit from "@material-ui/icons/Edit";
 import withStyles from "@material-ui/core/styles/withStyles";
 import Link from "next/link";
 
+import FollowUser from "../components/profile/FollowUser";
 import { authInitialProps } from "../lib/auth";
 import { getUser } from "../lib/api";
 
@@ -20,6 +21,7 @@ class Profile extends React.Component {
   state = {
     user: null,
     isAuth: false,
+    isFollowing: false,
     isLoading: true
   };
 
@@ -28,13 +30,30 @@ class Profile extends React.Component {
     const isAuth = auth.user._id === userId;
 
     getUser(userId).then(user => {
-      this.setState({ user, isAuth, isLoading: false });
+      const isFollowing = this.checkFollow(auth, user);
+      this.setState({ user, isAuth, isFollowing, isLoading: false });
     });
   }
 
+  // 檢查當下頁面用戶是否已經追蹤
+  checkFollow = (auth, user) => {
+    return (
+      user.followers.findIndex(follower => follower._id === auth.user._id) > -1
+    );
+  };
+
+  toggleFollow = sendRequest => {
+    const { userId } = this.props;
+    const { isFollowing } = this.state;
+
+    sendRequest(userId).then(() => {
+      this.setState({ isFollowing: !isFollowing });
+    });
+  };
+
   render() {
     const { classes } = this.props;
-    const { isLoading, user, isAuth } = this.state;
+    const { isLoading, user, isAuth, isFollowing } = this.state;
 
     return (
       <Paper className={classes.root} elevation={4}>
@@ -74,7 +93,10 @@ class Profile extends React.Component {
                   </Link>
                 </ListItemSecondaryAction>
               ) : (
-                <div>追蹤</div>
+                <FollowUser
+                  isFollowing={isFollowing}
+                  toggleFollow={this.toggleFollow}
+                />
               )}
             </ListItem>
             <Divider />
