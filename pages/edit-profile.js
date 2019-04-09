@@ -18,7 +18,7 @@ import EditSharp from "@material-ui/icons/EditSharp";
 import withStyles from "@material-ui/core/styles/withStyles";
 
 import { authInitialProps } from "../lib/auth";
-import { getAuthUser } from "../lib/api";
+import { getAuthUser, updateUser } from "../lib/api";
 
 class EditProfile extends React.Component {
   state = {
@@ -27,12 +27,14 @@ class EditProfile extends React.Component {
     email: "",
     about: "",
     avatar: "",
+    avatarPreview: "",
     isLoading: true
   };
 
   componentDidMount() {
     const { auth } = this.props;
 
+    this.userData = new FormData();
     getAuthUser(auth.user._id)
       .then(user => {
         this.setState({
@@ -46,9 +48,34 @@ class EditProfile extends React.Component {
       });
   }
 
+  handleChange = event => {
+    let inputValue;
+
+    if (event.target.name === "avatar") {
+      inputValue = event.target.files[0];
+      this.setState({ avatarPreview: this.createPreviewImage(inputValue) });
+    } else {
+      inputValue = event.target.value;
+    }
+    this.userData.set(event.target.name, inputValue);
+    this.setState({ [event.target.name]: inputValue });
+  };
+
+  // 圖像預覽
+  createPreviewImage = file => URL.createObjectURL(file);
+
+  handleSubmit = event => {
+    event.preventDefault();
+    updateUser(this.state._id, this.userData)
+      .then(updateUser => {
+        console.log(updateUser);
+      })
+      .catch(err => console.error(err));
+  };
+
   render() {
     const { classes } = this.props;
-    const { name, email, avatar, about, isLoading } = this.state;
+    const { name, email, avatar, about, isLoading, avatarPreview } = this.state;
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
@@ -66,7 +93,11 @@ class EditProfile extends React.Component {
                 <FaceTwoTone />
               </Avatar>
             ) : (
-              <Avatar src={avatar} className={classes.bigAvatar} />
+              // 沒有上傳新圖片時會顯示原本圖像
+              <Avatar
+                src={avatarPreview || avatar}
+                className={classes.bigAvatar}
+              />
             )}
             <input
               type="File"
@@ -120,6 +151,7 @@ class EditProfile extends React.Component {
               variant="contained"
               color="primary"
               className={classes.submit}
+              onClick={this.handleSubmit}
             >
               儲存
             </Button>
