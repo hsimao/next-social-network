@@ -16,6 +16,7 @@ import CloudUpload from "@material-ui/icons/CloudUpload";
 import FaceTwoTone from "@material-ui/icons/FaceTwoTone";
 import EditSharp from "@material-ui/icons/EditSharp";
 import withStyles from "@material-ui/core/styles/withStyles";
+import Router from 'next/router'
 
 import { authInitialProps } from "../lib/auth";
 import { getAuthUser, updateUser } from "../lib/api";
@@ -28,6 +29,11 @@ class EditProfile extends React.Component {
     about: "",
     avatar: "",
     avatarPreview: "",
+    openSuccess: false,
+    openError: false,
+    error: "",
+    updatedUser: null,
+    isSaving: false,
     isLoading: true
   };
 
@@ -64,18 +70,31 @@ class EditProfile extends React.Component {
   // 圖像預覽
   createPreviewImage = file => URL.createObjectURL(file);
 
+  handleClose = () => this.setState({ openError: false });
+
+  showError = err => {
+    const error = (err.response && err.response.data) || err.message;
+    console.log("error", error);
+    this.setState({ error, openError: true, isSaving: false });
+  };
+
   handleSubmit = event => {
     event.preventDefault();
+    this.setState({isSaving: true})
     updateUser(this.state._id, this.userData)
-      .then(updateUser => {
-        console.log(updateUser);
+      .then(updatedUser => {
+        this.setState({
+          updatedUser,
+          openSuccess: true
+        })
+        setTimeout(()=> Router.push(`/profile/${this.state._id}`), 3000)
       })
-      .catch(err => console.error(err));
+      .catch(this.showError);
   };
 
   render() {
     const { classes } = this.props;
-    const { name, email, avatar, about, isLoading, avatarPreview } = this.state;
+    const { name, email, avatar, about, isLoading, avatarPreview, isSaving, updatedUser, openSuccess, openError, error} = this.state;
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
@@ -147,16 +166,45 @@ class EditProfile extends React.Component {
             <Button
               type="submit"
               fullWidth
-              disabled={isLoading}
+              disabled={isSaving || isLoading}
               variant="contained"
               color="primary"
               className={classes.submit}
               onClick={this.handleSubmit}
             >
-              儲存
+              {isSaving ? "儲存中.." : "儲存"}
             </Button>
           </form>
         </Paper>
+
+          {/* 錯誤提示窗 */}
+          {error && (
+            <Snackbar
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right"
+              }}
+              open={openError}
+              onClose={this.handleClose}
+              autoHideDuration={6000}
+              message={<span className={classes.snack}>{error}</span>}
+            />
+          )}
+
+        {/* 成功彈窗 */}
+        <Dialog
+          open={openSuccess}
+          disableBackdropClick={true}
+        >
+          <DialogTitle>
+            <VerifiedUserTwoTone className={classes.icon} />
+            資料已更新
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>用戶 {updatedUser && updatedUser.name } 資料已更新成功</DialogContentText>
+          </DialogContent>
+        </Dialog>
+
       </div>
     );
   }
@@ -208,7 +256,7 @@ const styles = theme => ({
     marginTop: theme.spacing.unit * 2
   },
   snack: {
-    color: theme.palette.secondary.light
+    color: theme.palette.accent.light
   },
   icon: {
     padding: "0px 2px 2px 0px",
